@@ -123,6 +123,22 @@ export class TeamSizer {
         deadlineMinutes: number
     ): TeamSizeResult {
         // TODO: implement this method
-        throw new Error('Not implemented');
+
+        let foundSolution = false;
+        let numTechnicians = 1
+        let resultAssignment = null;
+
+        while(!foundSolution){
+            const assignment = this.tryAssign(startLocation,speedKmh,boxes,numTechnicians,deadlineMinutes) 
+        
+            if(assignment != null){
+                foundSolution = true
+                resultAssignment = assignment
+            } else{
+                numTechnicians++;
+            }
+        }
+
+        return {techniciansNeeded:numTechnicians,assignments:resultAssignment!,feasible:foundSolution}
     }
 }
