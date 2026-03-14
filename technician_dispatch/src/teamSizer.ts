@@ -125,7 +125,7 @@ export class TeamSizer {
         }
 
         const remaining = [...boxes];
-        // const assignments: TechnicianAssignment[] = [];
+        const assignments: TechnicianAssignment[] = [];
 
         for (let t = 0; t < numTechnicians; t++) {
             let route: string[] = [];
