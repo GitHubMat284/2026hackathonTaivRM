@@ -92,7 +92,7 @@ export class DayPlanner {
         const boxById = new Map<string, Box>(boxes.map(b => [b.id, b]));
 
         let totalDuration = 0;
-        let totalDistance = 0;
+
         let currentLocation = technician.startLocation;
 
         for (const boxId of routeIds) {
@@ -101,13 +101,14 @@ export class DayPlanner {
                 return null;
             }
 
-            totalDistance += this.haversineDistance(currentLocation, box.location);
-            totalDuration += this.travelTimeMinutes(currentLocation,box.location,technician.speedKmh)
+            const addedCost = this.travelTimeMinutes(currentLocation,box.location,technician.speedKmh) + box.fixTimeMinutes;
+            
+            totalDuration += addedCost;
 
             currentLocation = box.location;
         }
 
-        return totalDuration + totalDistance;
+        return totalDuration;
 
     }
 

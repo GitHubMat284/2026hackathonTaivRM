@@ -36,7 +36,7 @@ describe('DayPlanner — calculateRouteDuration', () => {
     it('single box: duration = travel + fix time', () => {
         // 0.1° ≈ 11.12 km → 11.12 min travel at 60 km/h, plus 30 min fix = ~41 min
         const box = eastBox('A', 0.1, 30);
-        const dur = planner.calculateRouteDuration(BASE_TECH, [box], ['A'])!;
+        const dur = planner.calculateRouteDuration(BASE_TECH, [box], ['A'])!; 
         expect(dur).toBeGreaterThan(40);
         expect(dur).toBeLessThan(45);
     });
