@@ -67,12 +67,64 @@ export class RouteOptimizer {
         boxes: Box[],
         routeIds: string[]
     ): number | null {
-        // TODO: implement this method
-        throw new Error('Not implemented');
+        if (routeIds.length === 0) {
+            return 0;
+        }
+
+        const boxById = new Map<string, Box>(boxes.map(b => [b.id, b]));
+
+        let totalDistance = 0;
+        let currentLocation = technician.startLocation;
+
+        for (const boxId of routeIds) {
+            const box = boxById.get(boxId);
+            if (!box) {
+                return null;
+            }
+
+            totalDistance += this.haversineDistance(currentLocation, box.location);
+            currentLocation = box.location;
+        }
+
+        return totalDistance;
     }
 
     findShortestRoute(technician: Technician, boxes: Box[]): RouteResult {
-        // TODO: implement this method
-        throw new Error('Not implemented');
+        if (boxes.length === 0) {
+            return {
+                technicianId: technician.id,
+                route: [],
+                totalDistanceKm: 0,
+            };
+        }
+
+        const remaining = [...boxes];
+        const route: string[] = [];
+        let currentLocation = technician.startLocation;
+        let totalDistance = 0;
+
+        while (remaining.length > 0) {
+            let nearestIndex = 0;
+            let nearestDistance = this.haversineDistance(currentLocation, remaining[0].location);
+
+            for (let i = 1; i < remaining.length; i++) {
+                const dist = this.haversineDistance(currentLocation, remaining[i].location);
+                if (dist < nearestDistance || (dist === nearestDistance && remaining[i].id < remaining[nearestIndex].id)) {
+                    nearestDistance = dist;
+                    nearestIndex = i;
+                }
+            }
+
+            const next = remaining.splice(nearestIndex, 1)[0];
+            route.push(next.id);
+            totalDistance += nearestDistance;
+            currentLocation = next.location;
+        }
+
+        return {
+            technicianId: technician.id,
+            route,
+            totalDistanceKm: totalDistance,
+        };
     }
 }
