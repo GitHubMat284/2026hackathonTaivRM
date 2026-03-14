@@ -85,7 +85,30 @@ export class DayPlanner {
         routeIds: string[]
     ): number | null {
         // TODO: implement this method
-        throw new Error('Not implemented');
+         if (routeIds.length === 0) {
+            return 0;
+        }
+
+        const boxById = new Map<string, Box>(boxes.map(b => [b.id, b]));
+
+        let totalDuration = 0;
+        let totalDistance = 0;
+        let currentLocation = technician.startLocation;
+
+        for (const boxId of routeIds) {
+            const box = boxById.get(boxId);
+            if (!box) {
+                return null;
+            }
+
+            totalDistance += this.haversineDistance(currentLocation, box.location);
+            totalDuration += this.travelTimeMinutes(currentLocation,box.location,technician.speedKmh)
+
+            currentLocation = box.location;
+        }
+
+        return totalDuration + totalDistance;
+
     }
 
     planDay(technician: Technician, boxes: Box[]): DayPlanResult {
