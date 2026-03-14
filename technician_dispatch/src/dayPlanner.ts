@@ -89,7 +89,47 @@ export class DayPlanner {
     }
 
     planDay(technician: Technician, boxes: Box[]): DayPlanResult {
-        // TODO: implement this method
-        throw new Error('Not implemented');
+            if (boxes.length === 0) {
+            return {
+                technicianId: technician.id,
+                plannedRoute: [],
+                totalTimeUsedMinutes: 0,
+                boxesFixed: 0,
+                skippedBoxIds: [],
+            };
+        }
+
+        const remaining = [...boxes];
+        const route: string[] = [];
+        let currentLocation = technician.startLocation;
+        let remainingTime = technician.workingMinutes;
+        let totalDistance = 0;
+
+        while (remainingTime > 0 && remaining.length > 0) {
+            let nearestIndex = 0;
+            let nearestOpportunityCost = this.haversineDistance(currentLocation, remaining[0].location) + remaining[0].fixTimeMinutes;
+
+            for (let i = 1; i < remaining.length; i++) {
+                const opportunityCost = this.haversineDistance(currentLocation, remaining[i].location) + remaining[i].fixTimeMinutes;
+                if (opportunityCost < nearestOpportunityCost || (opportunityCost === nearestOpportunityCost && remaining[i].id < remaining[nearestIndex].id)) {
+                    nearestOpportunityCost = opportunityCost;
+                    nearestIndex = i;
+                    remainingTime -= opportunityCost;
+                }
+            }
+
+            const next = remaining.splice(nearestIndex, 1)[0];
+            route.push(next.id);
+            totalDistance += nearestOpportunityCost;
+            currentLocation = next.location;
+        }
+
+        return {
+            technicianId: technician.id,
+            plannedRoute: route,
+            totalTimeUsedMinutes: (remainingTime > 0) ? technician.workingMinutes - remainingTime : technician.workingMinutes,
+            boxesFixed: route.length,
+            skippedBoxIds: remaining.map(box => box.id),
+        };
     }
 }
