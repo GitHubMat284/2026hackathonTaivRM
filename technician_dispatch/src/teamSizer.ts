@@ -113,11 +113,19 @@ export class TeamSizer {
         deadlineMinutes: number
     ): TechnicianAssignment[] | null {
         if (boxes.length === 0) {
-            return null;
+            const assignments: TechnicianAssignment[] = [];
+            for (let t = 0; t < numTechnicians; t++) {
+                assignments.push({
+                    technicianLabel: `Technician ${t + 1}`,
+                    assignedBoxIds: [],
+                    totalTimeMinutes: 0,
+                });
+            }
+            return assignments;
         }
 
         const remaining = [...boxes];
-        const assignments: TechnicianAssignment[] = [];
+        // const assignments: TechnicianAssignment[] = [];
 
         for (let t = 0; t < numTechnicians; t++) {
             let route: string[] = [];
