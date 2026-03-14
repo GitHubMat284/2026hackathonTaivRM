@@ -89,8 +89,73 @@ export class TeamSizer {
         numTechnicians: number,
         deadlineMinutes: number
     ): TechnicianAssignment[] | null {
-        // TODO: implement this method
-        throw new Error('Not implemented');
+        if (boxes.length === 0) {
+            return null;
+        }
+
+        const remaining = [...boxes];
+        const assignments: TechnicianAssignment[] = [];
+
+        for (let t = 0; t < numTechnicians; t++) {
+            let route: string[] = [];
+            let currentLocation = startLocation;
+            let remainingTime = deadlineMinutes;
+            let totalTime = 0;
+
+            while (remainingTime > 0 && remaining.length > 0) {
+                let bestIndex = -1;
+                let bestCost = Infinity;
+
+                // Find the box that fits and has the lowest cost
+                for (let i = 0; i < remaining.length; i++) {
+                    const travelTime = this.travelTimeMinutes(
+                        currentLocation,
+                        remaining[i].location,
+                        speedKmh
+                    );
+                    const totalCost = travelTime + remaining[i].fixTimeMinutes;
+
+                    // Consider boxes that can fit in remaining time
+                    if (totalCost <= remainingTime) {
+                        // Pick box with lowest cost &  break ties by ID
+                        if (
+                            totalCost < bestCost ||
+                            (totalCost === bestCost &&
+                                (bestIndex === -1 ||
+                                    remaining[i].id < remaining[bestIndex].id))
+                        ) {
+                            bestCost = totalCost;
+                            bestIndex = i;
+                        }
+                    }
+                }
+
+                // If no box was chosen, exit the loop
+                if (bestIndex === -1) break;
+
+                // Add the selected box to the route
+                const next = remaining.splice(bestIndex, 1)[0];
+                route.push(next.id);
+                remainingTime -= bestCost;
+                totalTime += bestCost;
+                currentLocation = next.location;
+            }
+
+            if (route.length > 0) {
+                assignments.push({
+                    technicianLabel: `Technician ${t + 1}`,
+                    assignedBoxIds: route,
+                    totalTimeMinutes: Math.round(totalTime),
+                });
+            }
+        }
+
+        // If there are still boxes left unassigned, return null
+        if (remaining.length > 0) {
+            return null;
+        }
+
+        return assignments;
     }
 
     findMinimumTeamSize(
